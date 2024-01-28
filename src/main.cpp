@@ -1,18 +1,25 @@
-#include <Arduino.h>
+//INCLUDE LIBRARY
+#include <DHT.h>
 
-// put function declarations here:
-int myFunction(int, int);
+//DECLARE PIN DHT22
+const int dhtPin = 13;
+DHT dhtSensor(dhtPin, DHT22);
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(115200);
+
+  //INITIALIZE DHT22
+  dhtSensor.begin();
+  Serial.println("Hello, ESP32!");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  delay(500); // this speeds up the simulation
+  //FETCH DATA SENSOR
+  float humidity = dhtSensor.readHumidity();
+  float temperature = dhtSensor.readTemperature();
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  //DISPLAY DATA TO SERIAL
+  Serial.println("Temp: " + String(temperature) + "°C");
+  Serial.println("Humidity: " + String(humidity) + "%");
 }
