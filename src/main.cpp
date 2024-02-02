@@ -8,10 +8,22 @@ const char* wifiPassword = "";
 const char* mqttServer = "broker.emqx.io";
 const int mqttPort = 1883;
 
-const char* temperatureTopic = "ESP32/temperature";
-const char* humidityTopic = "ESP32/humidity";
-const char* statusTopic = "ESP32/status";
-const char* controlTopic = "ESP32/control";
+//CONTROL TOPIC => TO ON/OFF THE IOT
+const char* controlTopic = "Kel5_ESP32/control";
+
+//TEMP & HUM => MONITORING TEMPERATURE & HUMIDITY
+const char* temperatureTopic = "Kel5_ESP32/temperature";
+const char* humidityTopic = "Kel5_ESP32/humidity";
+const char* statusTopic = "Kel5_ESP32/status";
+
+//DOOR LOCKING => CONTROL TO LOCK/UNLOCK DOOR
+const char* doorLockingTopic = "Kel5_ESP32/locking";
+
+//LDR LAMP
+const char* ldrLampTopic = "Kel5_ESP32/ldrlamp";
+
+//WATER => MONITORING WATER LEVEL 
+const char* waterTopic = "Kel5_ESP32/waterlevel";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
