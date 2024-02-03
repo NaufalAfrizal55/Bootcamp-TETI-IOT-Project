@@ -18,6 +18,7 @@ const char* statusTopic = "Kel5_ESP32/status";
 
 //DOOR LOCKING => CONTROL TO LOCK/UNLOCK DOOR
 const char* doorLockingTopic = "Kel5_ESP32/locking";
+const char* doorStatusTopic = "Kel5_ESP32/doorstatus";
 
 //LDR LAMP
 const char* ldrLampTopic = "Kel5_ESP32/ldrlamp";
@@ -41,7 +42,7 @@ void dht22(){
     float humidity = dhtSensor.readHumidity();
     float temperature = dhtSensor.readTemperature();
 		
-    Serial.printf("Humidity: %f %%, Temperature: %f C\r\n", humidity, temperature);
+    // Serial.printf("Humidity: %f %%, Temperature: %f C\r\n", humidity, temperature);
 
     //PUBLISH TO MQTT TEMP & HUM TOPIC
     char statusMessage[5];
@@ -59,6 +60,7 @@ const int pushButton = 35;
 const float GAMMA = 0.7;
 const float RL10 = 50;
 void lamp() {
+    String ldrStatus;
     analogValue = analogRead(ldrPin);
     float voltage = analogValue / 4096. * 5;
     float resistance = 2000 * voltage / (1 - voltage / 5);
@@ -71,17 +73,22 @@ void lamp() {
 
     if (digitalRead(pushButton) == HIGH) {
         isButtonPressed = !isButtonPressed;  
+        ldrStatus = "ON";
         delay(500);  
     }
     if (isButtonPressed) {
         digitalWrite(ledPin2, HIGH);
-    }else{
-        if (lux < 100) {
+        ldrStatus = "ON";
+    } else if (lux < 100) {
         digitalWrite(ledPin2, HIGH);
-        }else {
+        ldrStatus = "ON";
+    } else {
         digitalWrite(ledPin2, LOW);
-        }
+        ldrStatus = "OFF";
     }
+    char statusMessage2[5];
+    snprintf(statusMessage2, 5, "%s", ldrStatus.c_str());
+    client.publish(ldrButtonTopic, statusMessage2);
 }
 
 unsigned long lastSensorReadingTime = 0;
