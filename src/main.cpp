@@ -21,6 +21,7 @@ const char* doorLockingTopic = "Kel5_ESP32/locking";
 
 //LDR LAMP
 const char* ldrLampTopic = "Kel5_ESP32/ldrlamp";
+const char* ldrButtonTopic = "Kel5_ESP32/ldrbutton";
 
 //WATER => MONITORING WATER LEVEL 
 const char* waterTopic = "Kel5_ESP32/waterlevel";
@@ -39,15 +40,15 @@ DHT dhtSensor(dhtPin, DHT22);
 void dht22(){
     float humidity = dhtSensor.readHumidity();
     float temperature = dhtSensor.readTemperature();
-    Serial.println("Temp: " + String(temperature) + "°C");
-    Serial.println("Humidity: " + String(humidity) + "%");
-    if (temperature >= 34) {
-    Serial.println("Temperature is above 34°C");
-    digitalWrite(ledPin1, HIGH);
-    } else {
-    Serial.println("Temperature is below 34°C");
-    digitalWrite(ledPin1, LOW);
-    }
+		
+    Serial.printf("Humidity: %f %%, Temperature: %f C\r\n", humidity, temperature);
+
+    //PUBLISH TO MQTT TEMP & HUM TOPIC
+    char statusMessage[5];
+    snprintf(statusMessage, 5, "%f", humidity);
+    client.publish(humidityTopic, statusMessage);
+    snprintf(statusMessage, 5, "%f", temperature);
+    client.publish(temperatureTopic, statusMessage);
 }
 
 //LDR LAMP CODE
@@ -62,6 +63,11 @@ void lamp() {
     float voltage = analogValue / 4096. * 5;
     float resistance = 2000 * voltage / (1 - voltage / 5);
     float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
+
+    //PUBLISH TO MQTT LDR LAMP TOPIC
+    char statusMessage[5];
+    snprintf(statusMessage, 5, "%f", lux);
+    client.publish(ldrLampTopic, statusMessage);
 
     if (digitalRead(pushButton) == HIGH) {
         isButtonPressed = !isButtonPressed;  
@@ -165,17 +171,8 @@ void loop() {
     bool shouldMeasure = (currentTime - lastSensorReadingTime) > sensorReadingInterval;
     if (activeStatus && shouldMeasure) {
         lastSensorReadingTime = currentTime;
-        float humidity = dhtSensor.readHumidity();
-        float temperature = dhtSensor.readTemperature();
-		
-        Serial.printf("Humidity: %f %%, Temperature: %f C\r\n", humidity, temperature);
-
-        char statusMessage[5];
-        snprintf(statusMessage, 5, "%f", humidity);
-        client.publish(humidityTopic, statusMessage);
-        snprintf(statusMessage, 5, "%f", temperature);
-        client.publish(temperatureTopic, statusMessage);
+        dht22();
+        lamp();
     }
-    // dht22();
 }
 
