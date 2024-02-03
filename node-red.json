@@ -13,7 +13,7 @@
         "z": "d0edacd77c3da6a1",
         "name": "",
         "group": "ddb1e18b9b0cadb3",
-        "order": 3,
+        "order": 2,
         "width": 0,
         "height": 0,
         "passthru": false,
@@ -27,7 +27,7 @@
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
-        "x": 100,
+        "x": 80,
         "y": 80,
         "wires": [
             [
@@ -41,7 +41,7 @@
         "z": "d0edacd77c3da6a1",
         "name": "",
         "group": "ddb1e18b9b0cadb3",
-        "order": 2,
+        "order": 3,
         "width": 0,
         "height": 0,
         "passthru": false,
@@ -55,7 +55,7 @@
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
-        "x": 100,
+        "x": 80,
         "y": 120,
         "wires": [
             [
@@ -77,7 +77,7 @@
         "correl": "",
         "expiry": "",
         "broker": "1e95d36f322054c5",
-        "x": 300,
+        "x": 280,
         "y": 100,
         "wires": []
     },
@@ -155,11 +155,12 @@
         "rh": 0,
         "inputs": 0,
         "x": 270,
-        "y": 340,
+        "y": 320,
         "wires": [
             [
                 "d56eaf3630fcc5eb",
-                "bd44266ad3dbc930"
+                "bd44266ad3dbc930",
+                "9fae8d617ca5b423"
             ]
         ]
     },
@@ -177,7 +178,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 510,
-        "y": 320,
+        "y": 280,
         "wires": []
     },
     {
@@ -186,7 +187,7 @@
         "z": "d0edacd77c3da6a1",
         "name": "",
         "group": "365ea1cdfa491840",
-        "order": 0,
+        "order": 1,
         "width": 0,
         "height": 0,
         "gtype": "gage",
@@ -205,7 +206,7 @@
         "diff": false,
         "className": "",
         "x": 510,
-        "y": 360,
+        "y": 320,
         "wires": []
     },
     {
@@ -222,11 +223,12 @@
         "rh": 0,
         "inputs": 0,
         "x": 280,
-        "y": 440,
+        "y": 460,
         "wires": [
             [
                 "fa19fc4fce0d165b",
-                "a37d55539f9e9d42"
+                "a37d55539f9e9d42",
+                "21a147a1b057fe78"
             ]
         ]
     },
@@ -253,7 +255,7 @@
         "z": "d0edacd77c3da6a1",
         "name": "",
         "group": "409d978c88932ade",
-        "order": 3,
+        "order": 1,
         "width": 0,
         "height": 0,
         "gtype": "gage",
@@ -289,11 +291,10 @@
         "rh": 0,
         "inputs": 0,
         "x": 290,
-        "y": 660,
+        "y": 740,
         "wires": [
             [
                 "99a7bf37e2122407",
-                "4514b3ea115803fd",
                 "1e4b2512d0e9beb8"
             ]
         ]
@@ -312,28 +313,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 510,
-        "y": 620,
-        "wires": []
-    },
-    {
-        "id": "4514b3ea115803fd",
-        "type": "ui_text",
-        "z": "d0edacd77c3da6a1",
-        "group": "9f8936ac44979ceb",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "name": "",
-        "label": "Lamp Status",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "className": "",
-        "style": false,
-        "font": "",
-        "fontSize": 16,
-        "color": "#000000",
-        "x": 510,
-        "y": 660,
+        "y": 720,
         "wires": []
     },
     {
@@ -350,7 +330,7 @@
         "label": "units",
         "format": "{{value}}",
         "min": 0,
-        "max": "1000",
+        "max": "200",
         "colors": [
             "#00b500",
             "#e6e600",
@@ -361,7 +341,7 @@
         "diff": false,
         "className": "",
         "x": 510,
-        "y": 700,
+        "y": 760,
         "wires": []
     },
     {
@@ -453,7 +433,7 @@
         "expiry": "",
         "broker": "1e95d36f322054c5",
         "x": 280,
-        "y": 800,
+        "y": 880,
         "wires": []
     },
     {
@@ -462,7 +442,7 @@
         "z": "d0edacd77c3da6a1",
         "name": "",
         "group": "569acfb89cf627cf",
-        "order": 1,
+        "order": 2,
         "width": 0,
         "height": 0,
         "passthru": false,
@@ -477,7 +457,7 @@
         "topic": "topic",
         "topicType": "msg",
         "x": 70,
-        "y": 780,
+        "y": 860,
         "wires": [
             [
                 "3e5e1db099f3e81b"
@@ -490,7 +470,7 @@
         "z": "d0edacd77c3da6a1",
         "name": "",
         "group": "569acfb89cf627cf",
-        "order": 0,
+        "order": 3,
         "width": 0,
         "height": 0,
         "passthru": false,
@@ -505,11 +485,183 @@
         "topic": "topic",
         "topicType": "msg",
         "x": 70,
-        "y": 820,
+        "y": 900,
         "wires": [
             [
                 "3e5e1db099f3e81b"
             ]
+        ]
+    },
+    {
+        "id": "90ef0a5642e9ca96",
+        "type": "mqtt in",
+        "z": "d0edacd77c3da6a1",
+        "name": "",
+        "topic": "Kel5_ESP32/ldrbutton",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "1e95d36f322054c5",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 280,
+        "y": 660,
+        "wires": [
+            [
+                "320848f3f102b72d"
+            ]
+        ]
+    },
+    {
+        "id": "320848f3f102b72d",
+        "type": "ui_text",
+        "z": "d0edacd77c3da6a1",
+        "group": "9f8936ac44979ceb",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Lamp Status",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 510,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "7b02944de8daa7a3",
+        "type": "mqtt in",
+        "z": "d0edacd77c3da6a1",
+        "name": "",
+        "topic": "Kel5_ESP32/doorstatus",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "1e95d36f322054c5",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 280,
+        "y": 940,
+        "wires": [
+            [
+                "de2364fbf0c3b8e1"
+            ]
+        ]
+    },
+    {
+        "id": "de2364fbf0c3b8e1",
+        "type": "ui_text",
+        "z": "d0edacd77c3da6a1",
+        "group": "569acfb89cf627cf",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Key Status",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 510,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "9fae8d617ca5b423",
+        "type": "ui_chart",
+        "z": "d0edacd77c3da6a1",
+        "name": "",
+        "group": "365ea1cdfa491840",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Temp Chart",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 510,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "21a147a1b057fe78",
+        "type": "ui_chart",
+        "z": "d0edacd77c3da6a1",
+        "name": "",
+        "group": "409d978c88932ade",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Hum Chart",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 510,
+        "y": 500,
+        "wires": [
+            []
         ]
     },
     {
