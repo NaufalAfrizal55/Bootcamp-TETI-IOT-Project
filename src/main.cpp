@@ -38,7 +38,7 @@ unsigned long lastSensorReadingTime = 0;
 bool activeStatus = false;
 bool ldrActiveStatus = false;
 
-//DHT22 CODE
+/*-----------DHT22 FUNCTION---------------*/
 const int dhtPin = 13;
 const int ledPin1 =  22;
 DHT dhtSensor(dhtPin, DHT22);
@@ -48,15 +48,16 @@ void dht22(){
 		
     // Serial.printf("Humidity: %f %%, Temperature: %f C\r\n", humidity, temperature);
 
-    //PUBLISH TO MQTT TEMP & HUM TOPIC
+    //PUBLISH TEMP & HUM TOPIC TO MQTT
     char statusMessage[5];
     snprintf(statusMessage, 5, "%f", humidity);
     client.publish(humidityTopic, statusMessage);
     snprintf(statusMessage, 5, "%f", temperature);
     client.publish(temperatureTopic, statusMessage);
 }
+/*----------END DHT22 FUNCTION-----------------*/
 
-//LDR LAMP CODE
+/*-------------LDR LAMP FUNCTION-------------------*/
 const int ldrPin = 34;
 const int ledPin2 = 4;
 const int pushButton = 35;
@@ -70,7 +71,7 @@ void lamp() {
     float resistance = 2000 * voltage / (1 - voltage / 5);
     float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
 
-    //PUBLISH TO MQTT LDR LAMP TOPIC
+    //PUBLISH LDR LAMP TOPIC TO MQTT
     char statusMessage[5];
     snprintf(statusMessage, 5, "%f", lux);
     client.publish(ldrLampTopic, statusMessage);
@@ -114,7 +115,26 @@ void lamp() {
     client.publish(ldrStatusTopic, statusMessage2);
 }
 
-//ULTRASONIC HC-SR04
+//LDR LAMP STATUS
+void ldrStatus(bool status) {
+    String statusString;
+    if (status) {
+        digitalWrite(ledPin2, HIGH);
+        statusString = "ON";
+    } else {
+        digitalWrite(ledPin2, LOW);
+        statusString = "OFF";
+    }
+    Serial.printf("Status Lamp: %s\r\n", statusString.c_str());
+
+    //PUBLISH LDR LAMP STATUS TO MQTT
+    char statusMessage[5];
+    snprintf(statusMessage, 5, "%s", statusString.c_str());
+    client.publish(ldrStatusTopic, statusMessage);
+}
+/*----------------END LDR LAMP FUNCTION-------------------*/
+
+/*-----------ULTRASONIC HC-SR04 (WATER PUMP) FUNCTION----------------*/
 const int Trig_pin = 14;
 const int Echo_pin = 27;
 const int buzzer = 26;
@@ -151,7 +171,10 @@ void output_jarak(){
     delay(100);
   }
 }
+/*--------END WATER PUMP FUNCTION-----------*/
 
+/*---------CONFIG MQTT------------*/
+//IOT STATUS (ON OR OFF)
 void showStatus(bool status) {
     String statusString;
     if (status) {
@@ -168,27 +191,12 @@ void showStatus(bool status) {
     client.publish(statusTopic, statusMessage);
 }
 
-void ldrStatus(bool status) {
-    String statusString;
-    if (status) {
-        digitalWrite(ledPin2, HIGH);
-        statusString = "ON";
-    } else {
-        digitalWrite(ledPin2, LOW);
-        statusString = "OFF";
-    }
-    Serial.printf("Status Lamp: %s\r\n", statusString.c_str());
-
-    char statusMessage[5];
-    snprintf(statusMessage, 5, "%s", statusString.c_str());
-    client.publish(ldrStatusTopic, statusMessage);
-}
-
 void receivedCallback(char* topic, byte* payload, unsigned int length) {
     Serial.printf("Message received: %s\r\n", topic);
     char statusInput = (char)payload[0];
     Serial.printf("Payload: %c\r\n", statusInput);
 
+    //CALLBACK WHEN PAYLOAD FROM CONTROL TOPIC
     if (strcmp(topic, controlTopic) == 0) {
         if (statusInput == '0') {
             activeStatus = false;
@@ -198,6 +206,7 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
         }
         showStatus(activeStatus);
     }
+    //CALLBACK WHEN PAYLOAD FROM LDR BUTTON TOPIC
     if (strcmp(topic, ldrButtonTopic) == 0) {
         if (statusInput == '0') {
             ldrActiveStatus = false;
@@ -227,9 +236,11 @@ void mqttConnect() {
         }
     }
 }
+/*-------------END CONFIG MQTT----------------*/
 
 void setup() {
     Serial.begin(115200);
+
     //SETUP DHT22
     pinMode(ledPin1, OUTPUT);
     dhtSensor.begin();
@@ -239,6 +250,7 @@ void setup() {
     pinMode(ldrPin, INPUT);
     pinMode(pushButton, INPUT);  
 
+    //SETUP MQTT 
     Serial.printf("Connecting to %s ", wifiSsid);
     WiFi.mode(WIFI_STA);
     WiFi.begin(wifiSsid, wifiPassword);
@@ -256,6 +268,7 @@ void setup() {
 
 void loop() {
     delay(500); // this speeds up the simulation
+    //MQTT CONNECTING
     if (!client.connected()) {
       mqttConnect();
     }
