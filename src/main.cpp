@@ -11,11 +11,12 @@ const int mqttPort = 1883;
 
 //CONTROL TOPIC => TO ON/OFF THE IOT
 const char* controlTopic = "Kel5_ESP32/control";
+const char* statusTopic = "Kel5_ESP32/status";
 
 //TEMP & HUM => MONITORING TEMPERATURE & HUMIDITY
 const char* temperatureTopic = "Kel5_ESP32/temperature";
 const char* humidityTopic = "Kel5_ESP32/humidity";
-const char* statusTopic = "Kel5_ESP32/status";
+const char* acStatusTopic = "Kel5_ESP32/acstatus";
 
 //DOOR LOCKING => CONTROL TO LOCK/UNLOCK DOOR
 const char* doorLockingTopic = "Kel5_ESP32/locking";
@@ -28,6 +29,7 @@ const char* ldrButtonTopic = "Kel5_ESP32/ldrbutton";
 
 //WATER => MONITORING WATER LEVEL 
 const char* waterTopic = "Kel5_ESP32/waterlevel";
+const char* waterStatusTopic = "Kel5_ESP32/waterstatus";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -44,9 +46,17 @@ const int dhtPin = 13;
 const int ledPin1 =  22;
 DHT dhtSensor(dhtPin, DHT22);
 void dht22(){
+    String statusString;
     float humidity = dhtSensor.readHumidity();
     float temperature = dhtSensor.readTemperature();
-		
+	
+    if(temperature > 28){
+        digitalWrite(ledPin1, HIGH);
+        statusString = "ON";
+    } else {
+        digitalWrite(ledPin1, LOW);
+        statusString = "OFF";        
+    }
     // Serial.printf("Humidity: %f %%, Temperature: %f C\r\n", humidity, temperature);
 
     //PUBLISH TEMP & HUM TOPIC TO MQTT
@@ -55,21 +65,49 @@ void dht22(){
     client.publish(humidityTopic, statusMessage);
     snprintf(statusMessage, 5, "%f", temperature);
     client.publish(temperatureTopic, statusMessage);
+    snprintf(statusMessage, 5, "%s", statusString.c_str());
+    client.publish(acStatusTopic, statusMessage);
 }
 /*----------END DHT22 FUNCTION-----------------*/
 
-
-/*-------------LDR LAMP FUNCTION-------------------*/
-
+/*---------DOOR LOCKING----------*/
 //DOOR LOCKING
+bool doorLockingStatus = false;
 const int servoPin = 32;
 const int relay = 12;
 Servo servo; 
-//LDR LAMP CODE
+void doorStatus(bool status) {
+    String statusString;
+    if (status) {
+        statusString = "LOCKED";
+    } else {
+        statusString = "UNLOCKED";
+    }
+    Serial.printf("Door Status: %s\r\n", statusString.c_str());
 
+    //PUBLISH LDR LAMP STATUS TO MQTT
+    char statusMessage[5];
+    snprintf(statusMessage, 5, "%s", statusString.c_str());
+    client.publish(doorStatusTopic, statusMessage);
+}
+
+void doorLock(bool doorLockingStatus){
+    if (doorLockingStatus){
+        digitalWrite(relay, HIGH);
+        servo.write(90);
+        delay(10); 
+    } else {
+        digitalWrite(relay, LOW);
+        servo.write(180);
+        delay(10); 
+    }
+}
+/*---------END DOOR LOCKING----------*/
+
+/*-------------LDR LAMP FUNCTION-------------------*/
+//LDR LAMP CODE
 const int ldrPin = 34;
 const int ledPin2 = 4;
-const int pushButton = 35;
 // LDR Characteristics
 const float GAMMA = 0.7;
 const float RL10 = 50;
@@ -85,38 +123,19 @@ void lamp() {
     snprintf(statusMessage, 5, "%f", lux);
     client.publish(ldrLampTopic, statusMessage);
 
-    // if (digitalRead(pushButton) == HIGH) {
-    //     isButtonPressed = !isButtonPressed;  
-    //     ldrStatus = "ON";
-    //     delay(500);  
-    // }
-    // if (isButtonPressed) {
-    //     digitalWrite(ledPin2, HIGH);
-    //     ldrStatus = "ON";
-    // } else if (lux < 100) {
-    //     digitalWrite(ledPin2, HIGH);
-    //     ldrStatus = "ON";
-    // } else {
-    //     digitalWrite(ledPin2, LOW);
-    //     ldrStatus = "OFF";
-    // }
-
 //PRIORITY LAMP ON : BUTTON DASHBOARD > BUTTON > LUX
-    if (ldrActiveStatus) {
+    if(ldrActiveStatus){
         digitalWrite(ledPin2, HIGH);
-        ldrStatus = "ON";
-    } 
-    else if (isButtonPressed) {
-        digitalWrite(ledPin2, HIGH);
-        ldrStatus = "ON";
-    } 
-    else if (lux <= 100) {
-        digitalWrite(ledPin2, HIGH);
-        ldrStatus = "ON";
-    } 
-    else {
-        digitalWrite(ledPin2, LOW);
-        ldrStatus = "OFF";
+        ldrStatus = "ON";        
+    } else if(!ldrActiveStatus){
+            if(lux <= 100){
+                digitalWrite(ledPin2, HIGH);
+                ldrStatus = "ON"; 
+            } 
+            else {
+                digitalWrite(ledPin2, LOW);
+                ldrStatus = "OFF"; 
+            }
     }
 
     char statusMessage2[5];
@@ -134,7 +153,7 @@ void ldrStatus(bool status) {
         digitalWrite(ledPin2, LOW);
         statusString = "OFF";
     }
-    Serial.printf("Status Lamp: %s\r\n", statusString.c_str());
+    Serial.printf("Lamp Status : %s\r\n", statusString.c_str());
 
     //PUBLISH LDR LAMP STATUS TO MQTT
     char statusMessage[5];
@@ -154,19 +173,40 @@ int batas_penuh=10;
 int freq = 2000;
 int channel = 1;
 int resolution = 8;
+float waterTubHeight = 100;
+String pumpStatus;
+
+void waterStatus(float status) {
+    if (status > batas_kosong) {
+        pumpStatus = "ON";
+    } else if(status <= batas_penuh){
+        pumpStatus = "OFF";
+    }
+
+    char statusMessage[5];
+    snprintf(statusMessage, 5, "%s", pumpStatus.c_str());
+    client.publish(waterStatusTopic, statusMessage);
+}
 
 void ukur_jarak() //distance calculaion...
 {
-  digitalWrite(Trig_pin, LOW);
-  delay(10);
-  digitalWrite(Trig_pin, HIGH);
-  delay(10);
-  digitalWrite(Trig_pin, LOW);
-  
-  durasi = pulseIn(Echo_pin, HIGH);
-  jarak = durasi * 0.034 / 2;
-
-  Serial.println(jarak);
+    digitalWrite(Trig_pin, LOW);
+    delay(10);
+    digitalWrite(Trig_pin, HIGH);
+    delay(10);
+    digitalWrite(Trig_pin, LOW);
+    
+    durasi = pulseIn(Echo_pin, HIGH);
+    jarak = durasi * 0.034 / 2;
+    waterStatus(jarak);
+    float waterHeight = waterTubHeight - jarak;
+    if(waterHeight < 0){
+        waterHeight = 0;
+    }
+    //PUBLISH LDR LAMP TOPIC TO MQTT
+    char statusMessage[5];
+    snprintf(statusMessage, 5, "%f", waterHeight);
+    client.publish(waterTopic, statusMessage);
 }
 
 void myTone(int pin)
@@ -184,14 +224,13 @@ void output_jarak(){
   if(jarak > batas_kosong) {
     myTone(buzzer);//digitalWrite(buzzer, HIGH);//Buzzer beeping......
     delay(2000);
-    Serial.print("pump on\n");
+    // Serial.print("pump on\n");
   }
   else if(jarak <= batas_penuh) {
     myNoTone(buzzer);//digitalWrite(buzzer, LOW);
-    Serial.print("pump off\n");
+    // Serial.print("pump off\n");
     delay(100);
     digitalWrite (buzzer , LOW);
-
   }
 }
 /*--------END WATER PUMP FUNCTION-----------*/
@@ -201,13 +240,11 @@ void output_jarak(){
 void showStatus(bool status) {
     String statusString;
     if (status) {
-        digitalWrite(ledPin1, HIGH);
         statusString = "ON";
     } else {
-        digitalWrite(ledPin1, LOW);
         statusString = "OFF";
     }
-    Serial.printf("Status IOT: %s\r\n", statusString.c_str());
+    Serial.printf("IOT Status : %s\r\n", statusString.c_str());
 
     char statusMessage[5];
     snprintf(statusMessage, 5, "%s", statusString.c_str());
@@ -239,6 +276,16 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
         }
         ldrStatus(ldrActiveStatus);
     }
+    //CALLBACK WHEN PAYLOAD FROM DOOR LOCKING TOPIC
+    if (strcmp(topic, doorLockingTopic) == 0) {
+        if (statusInput == '0') {
+            doorLockingStatus = false;
+        }
+        if (statusInput == '1') {
+            doorLockingStatus = true;
+        }
+        doorStatus(doorLockingStatus);
+    }
 }
 
 void mqttConnect() {
@@ -251,6 +298,7 @@ void mqttConnect() {
             Serial.println(clientId);
             client.subscribe(controlTopic);
             client.subscribe(ldrButtonTopic);
+            client.subscribe(doorLockingTopic);
         } else {
             Serial.print("failed, state: ");
             Serial.print(client.state());
@@ -262,6 +310,7 @@ void mqttConnect() {
 /*-------------END CONFIG MQTT----------------*/
 
 void setup() {
+    delay(500);
     Serial.begin(115200);
 
     //SETUP DHT22
@@ -274,8 +323,7 @@ void setup() {
 
     //SETUP LDR LAMP
     pinMode(ledPin2, OUTPUT);
-    pinMode(ldrPin, INPUT);
-    pinMode(pushButton, INPUT); 
+    pinMode(ldrPin, INPUT); 
 
     //Setup Water Pump
     pinMode(Trig_pin, OUTPUT);
@@ -314,8 +362,8 @@ void loop() {
     if (activeStatus && shouldMeasure) {
         lastSensorReadingTime = currentTime;
         dht22();
-        lamp();
-        
+        lamp(); 
+        doorLock(doorLockingStatus);
     }
 
     if (activeStatus) {
@@ -324,17 +372,6 @@ void loop() {
     } else {
         digitalWrite(buzzer,LOW);// pump off...
         myNoTone(buzzer);//digitalWrite(buzzer, LOW);
-    }
-
-    //DOOR LOCKING
-    if (activeStatus){
-        digitalWrite(relay, HIGH);
-        servo.write(90);
-        delay(500);
-    } else {
-        digitalWrite(relay, LOW);
-        servo.write(180);
-        delay(500);
     }
 }
 
