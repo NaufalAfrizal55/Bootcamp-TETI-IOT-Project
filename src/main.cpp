@@ -91,7 +91,7 @@ void lamp() {
     //     ldrStatus = "OFF";
     // }
 
-//PRIORITY BUTTON : BUTTON DASHBOARD > BUTTON > LUX
+//PRIORITY LAMP ON : BUTTON DASHBOARD > BUTTON > LUX
     if (ldrActiveStatus) {
         digitalWrite(ledPin2, HIGH);
         ldrStatus = "ON";
@@ -112,6 +112,44 @@ void lamp() {
     char statusMessage2[5];
     snprintf(statusMessage2, 5, "%s", ldrStatus.c_str());
     client.publish(ldrStatusTopic, statusMessage2);
+}
+
+//ULTRASONIC HC-SR04
+const int Trig_pin = 14;
+const int Echo_pin = 27;
+const int buzzer = 26;
+float durasi;
+float jarak;
+int batas_kosong=80;
+int batas_penuh=10;
+
+void ukur_jarak() //distance calculaion...
+{
+  digitalWrite(Trig_pin, LOW);
+  delay(10);
+  digitalWrite(Trig_pin, HIGH);
+  delay(10);
+  digitalWrite(Trig_pin, LOW);
+  
+  durasi = pulseIn(Echo_pin, HIGH);
+  jarak = durasi * 0.034 / 2;
+
+  Serial.println(jarak);
+}
+
+void output_jarak(){
+  if(jarak > batas_kosong) {
+    digitalWrite(10,HIGH);// Pump On...
+    tone(buzzer, 450);//digitalWrite(buzzer, HIGH);//Buzzer beeping......
+    delay(2000);
+    Serial.print("pump on\n");
+  }
+  else if(jarak <= batas_penuh) {
+    digitalWrite(10,LOW);// pump off...
+    noTone(buzzer);//digitalWrite(buzzer, LOW);
+    Serial.print("pump off\n");
+    delay(100);
+  }
 }
 
 void showStatus(bool status) {
@@ -159,7 +197,6 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
             activeStatus = true;
         }
         showStatus(activeStatus);
-
     }
     if (strcmp(topic, ldrButtonTopic) == 0) {
         if (statusInput == '0') {
@@ -169,7 +206,6 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
             ldrActiveStatus = true;
         }
         ldrStatus(ldrActiveStatus);
-
     }
 }
 
@@ -216,6 +252,8 @@ void setup() {
     client.setCallback(receivedCallback);
 }
 
+
+
 void loop() {
     delay(500); // this speeds up the simulation
     if (!client.connected()) {
@@ -230,6 +268,8 @@ void loop() {
         lastSensorReadingTime = currentTime;
         dht22();
         lamp();
+        ukur_jarak();
+        output_jarak();
     }
 }
 
