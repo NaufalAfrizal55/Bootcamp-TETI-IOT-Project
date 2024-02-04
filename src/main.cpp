@@ -91,6 +91,44 @@ void lamp() {
     client.publish(ldrButtonTopic, statusMessage2);
 }
 
+//ULTRASONIC HC-SR04
+#define Trig_pin 14
+#define Echo_pin 27
+#define buzzer 26
+float durasi;
+float jarak;
+int batas_kosong=80;
+int batas_penuh=10;
+
+void ukur_jarak() //distance calculaion...
+{
+  digitalWrite(Trig_pin, LOW);
+  delay(10);
+  digitalWrite(Trig_pin, HIGH);
+  delay(10);
+  digitalWrite(Trig_pin, LOW);
+  
+  durasi = pulseIn(Echo_pin, HIGH);
+  jarak = durasi * 0.034 / 2;
+
+  Serial.println(jarak);
+}
+
+void output_jarak(){
+  if(jarak > batas_kosong) {
+    digitalWrite(10,HIGH);// Pump On...
+    tone(buzzer, 450);//digitalWrite(buzzer, HIGH);//Buzzer beeping......
+    delay(2000);
+    Serial.print("pump on\n");
+  }
+  else if(jarak <= batas_penuh) {
+    digitalWrite(10,LOW);// pump off...
+    noTone(buzzer);//digitalWrite(buzzer, LOW);
+    Serial.print("pump off\n");
+    delay(100);
+  }
+}
+
 unsigned long lastSensorReadingTime = 0;
 bool activeStatus = false;
 
@@ -165,6 +203,8 @@ void setup() {
     client.setCallback(receivedCallback);
 }
 
+
+
 void loop() {
     delay(500); // this speeds up the simulation
     // lamp();
@@ -180,6 +220,8 @@ void loop() {
         lastSensorReadingTime = currentTime;
         dht22();
         lamp();
+        ukur_jarak();
+        output_jarak();
     }
 }
 
