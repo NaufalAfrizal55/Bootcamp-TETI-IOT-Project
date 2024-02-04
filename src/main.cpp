@@ -1,6 +1,7 @@
 #include <DHT.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <ESP32Servo.h>
 
 //MQTT
 const char* wifiSsid = "Wokwi-GUEST";
@@ -57,7 +58,15 @@ void dht22(){
 }
 /*----------END DHT22 FUNCTION-----------------*/
 
+
 /*-------------LDR LAMP FUNCTION-------------------*/
+
+//DOOR LOCKING
+const int servoPin = 32;
+const int relay = 12;
+Servo servo; 
+//LDR LAMP CODE
+
 const int ldrPin = 34;
 const int ledPin2 = 4;
 const int pushButton = 35;
@@ -245,6 +254,10 @@ void setup() {
     pinMode(ledPin1, OUTPUT);
     dhtSensor.begin();
 
+    //SETUP DOOR LOCKING
+    pinMode(relay, OUTPUT);
+    servo.attach(servoPin);
+
     //SETUP LDR LAMP
     pinMode(ledPin2, OUTPUT);
     pinMode(ldrPin, INPUT);
@@ -283,6 +296,17 @@ void loop() {
         lamp();
         ukur_jarak();
         output_jarak();
+    }
+
+    //DOOR LOCKING
+    if (activeStatus){
+        digitalWrite(relay, HIGH);
+        servo.write(90);
+        delay(500);
+    } else {
+        digitalWrite(relay, LOW);
+        servo.write(180);
+        delay(500);
     }
 }
 
