@@ -22,6 +22,7 @@ const char* doorStatusTopic = "Kel5_ESP32/doorstatus";
 
 //LDR LAMP
 const char* ldrLampTopic = "Kel5_ESP32/ldrlamp";
+const char* ldrStatusTopic = "Kel5_ESP32/ldrstatus";
 const char* ldrButtonTopic = "Kel5_ESP32/ldrbutton";
 
 //WATER => MONITORING WATER LEVEL 
@@ -33,6 +34,9 @@ PubSubClient client(espClient);
 int analogValue = 0;
 bool isButtonPressed = false;
 const int sensorReadingInterval = 1000;
+unsigned long lastSensorReadingTime = 0;
+bool activeStatus = false;
+bool ldrActiveStatus = false;
 
 //DHT22 CODE
 const int dhtPin = 13;
@@ -71,28 +75,44 @@ void lamp() {
     snprintf(statusMessage, 5, "%f", lux);
     client.publish(ldrLampTopic, statusMessage);
 
-    if (digitalRead(pushButton) == HIGH) {
-        isButtonPressed = !isButtonPressed;  
-        ldrStatus = "ON";
-        delay(500);  
-    }
-    if (isButtonPressed) {
+    // if (digitalRead(pushButton) == HIGH) {
+    //     isButtonPressed = !isButtonPressed;  
+    //     ldrStatus = "ON";
+    //     delay(500);  
+    // }
+    // if (isButtonPressed) {
+    //     digitalWrite(ledPin2, HIGH);
+    //     ldrStatus = "ON";
+    // } else if (lux < 100) {
+    //     digitalWrite(ledPin2, HIGH);
+    //     ldrStatus = "ON";
+    // } else {
+    //     digitalWrite(ledPin2, LOW);
+    //     ldrStatus = "OFF";
+    // }
+
+//PRIORITY BUTTON : BUTTON DASHBOARD > BUTTON > LUX
+    if (ldrActiveStatus) {
         digitalWrite(ledPin2, HIGH);
         ldrStatus = "ON";
-    } else if (lux < 100) {
+    } 
+    else if (isButtonPressed) {
         digitalWrite(ledPin2, HIGH);
         ldrStatus = "ON";
-    } else {
+    } 
+    else if (lux <= 100) {
+        digitalWrite(ledPin2, HIGH);
+        ldrStatus = "ON";
+    } 
+    else {
         digitalWrite(ledPin2, LOW);
         ldrStatus = "OFF";
     }
+
     char statusMessage2[5];
     snprintf(statusMessage2, 5, "%s", ldrStatus.c_str());
-    client.publish(ldrButtonTopic, statusMessage2);
+    client.publish(ldrStatusTopic, statusMessage2);
 }
-
-unsigned long lastSensorReadingTime = 0;
-bool activeStatus = false;
 
 void showStatus(bool status) {
     String statusString;
@@ -103,11 +123,27 @@ void showStatus(bool status) {
         digitalWrite(ledPin1, LOW);
         statusString = "OFF";
     }
-    Serial.printf("Status: %s\r\n", statusString.c_str());
+    Serial.printf("Status IOT: %s\r\n", statusString.c_str());
 
     char statusMessage[5];
     snprintf(statusMessage, 5, "%s", statusString.c_str());
     client.publish(statusTopic, statusMessage);
+}
+
+void ldrStatus(bool status) {
+    String statusString;
+    if (status) {
+        digitalWrite(ledPin2, HIGH);
+        statusString = "ON";
+    } else {
+        digitalWrite(ledPin2, LOW);
+        statusString = "OFF";
+    }
+    Serial.printf("Status Lamp: %s\r\n", statusString.c_str());
+
+    char statusMessage[5];
+    snprintf(statusMessage, 5, "%s", statusString.c_str());
+    client.publish(ldrStatusTopic, statusMessage);
 }
 
 void receivedCallback(char* topic, byte* payload, unsigned int length) {
@@ -115,12 +151,26 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
     char statusInput = (char)payload[0];
     Serial.printf("Payload: %c\r\n", statusInput);
 
-    if (statusInput == '0') {
-        activeStatus = false;
-    } else if (statusInput == '1') {
-        activeStatus = true;
+    if (strcmp(topic, controlTopic) == 0) {
+        if (statusInput == '0') {
+            activeStatus = false;
+        }
+        if (statusInput == '1') {
+            activeStatus = true;
+        }
+        showStatus(activeStatus);
+
     }
-    showStatus(activeStatus);
+    if (strcmp(topic, ldrButtonTopic) == 0) {
+        if (statusInput == '0') {
+            ldrActiveStatus = false;
+        }
+        if (statusInput == '1') {
+            ldrActiveStatus = true;
+        }
+        ldrStatus(ldrActiveStatus);
+
+    }
 }
 
 void mqttConnect() {
@@ -132,6 +182,7 @@ void mqttConnect() {
             Serial.print("Connected with id: ");
             Serial.println(clientId);
             client.subscribe(controlTopic);
+            client.subscribe(ldrButtonTopic);
         } else {
             Serial.print("failed, state: ");
             Serial.print(client.state());
@@ -167,7 +218,6 @@ void setup() {
 
 void loop() {
     delay(500); // this speeds up the simulation
-    // lamp();
     if (!client.connected()) {
       mqttConnect();
     }

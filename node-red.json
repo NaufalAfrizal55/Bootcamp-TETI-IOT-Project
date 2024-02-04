@@ -365,7 +365,7 @@
         "topic": "topic",
         "topicType": "msg",
         "x": 70,
-        "y": 580,
+        "y": 560,
         "wires": [
             [
                 "ea2cde33278f53cd"
@@ -393,7 +393,7 @@
         "topic": "topic",
         "topicType": "msg",
         "x": 70,
-        "y": 620,
+        "y": 600,
         "wires": [
             [
                 "ea2cde33278f53cd"
@@ -415,7 +415,7 @@
         "expiry": "",
         "broker": "1e95d36f322054c5",
         "x": 280,
-        "y": 600,
+        "y": 580,
         "wires": []
     },
     {
@@ -497,7 +497,7 @@
         "type": "mqtt in",
         "z": "d0edacd77c3da6a1",
         "name": "",
-        "topic": "Kel5_ESP32/ldrbutton",
+        "topic": "Kel5_ESP32/ldrstatus",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "1e95d36f322054c5",
@@ -506,10 +506,11 @@
         "rh": 0,
         "inputs": 0,
         "x": 280,
-        "y": 660,
+        "y": 640,
         "wires": [
             [
-                "320848f3f102b72d"
+                "320848f3f102b72d",
+                "3a6b60780b9c84d9"
             ]
         ]
     },
@@ -663,6 +664,23 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "3a6b60780b9c84d9",
+        "type": "debug",
+        "z": "d0edacd77c3da6a1",
+        "name": "msg.payload",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 620,
+        "wires": []
     },
     {
         "id": "ddb1e18b9b0cadb3",
