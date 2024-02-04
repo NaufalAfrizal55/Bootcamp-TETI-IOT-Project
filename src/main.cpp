@@ -151,6 +151,9 @@ float durasi;
 float jarak;
 int batas_kosong=80;
 int batas_penuh=10;
+int freq = 2000;
+int channel = 1;
+int resolution = 8;
 
 void ukur_jarak() //distance calculaion...
 {
@@ -166,18 +169,29 @@ void ukur_jarak() //distance calculaion...
   Serial.println(jarak);
 }
 
+void myTone(int pin)
+{
+  ledcAttachPin(pin, 1);             // pin, channel
+  ledcWriteNote(1, NOTE_F, 4);    // channel, frequency, octave
+}
+
+void myNoTone(int pin)
+{
+  ledcDetachPin(pin);
+}
+
 void output_jarak(){
   if(jarak > batas_kosong) {
-    digitalWrite(10,HIGH);// Pump On...
-    tone(buzzer, 450);//digitalWrite(buzzer, HIGH);//Buzzer beeping......
+    myTone(buzzer);//digitalWrite(buzzer, HIGH);//Buzzer beeping......
     delay(2000);
     Serial.print("pump on\n");
   }
   else if(jarak <= batas_penuh) {
-    digitalWrite(10,LOW);// pump off...
-    noTone(buzzer);//digitalWrite(buzzer, LOW);
+    myNoTone(buzzer);//digitalWrite(buzzer, LOW);
     Serial.print("pump off\n");
     delay(100);
+    digitalWrite (buzzer , LOW);
+
   }
 }
 /*--------END WATER PUMP FUNCTION-----------*/
@@ -261,7 +275,14 @@ void setup() {
     //SETUP LDR LAMP
     pinMode(ledPin2, OUTPUT);
     pinMode(ldrPin, INPUT);
-    pinMode(pushButton, INPUT);  
+    pinMode(pushButton, INPUT); 
+
+    //Setup Water Pump
+    pinMode(Trig_pin, OUTPUT);
+    pinMode(Echo_pin,INPUT);
+    pinMode(buzzer, OUTPUT);
+    ledcSetup(channel, freq, resolution);
+    ledcAttachPin(buzzer, channel);
 
     //SETUP MQTT 
     Serial.printf("Connecting to %s ", wifiSsid);
@@ -294,8 +315,15 @@ void loop() {
         lastSensorReadingTime = currentTime;
         dht22();
         lamp();
+        
+    }
+
+    if (activeStatus) {
         ukur_jarak();
         output_jarak();
+    } else {
+        digitalWrite(buzzer,LOW);// pump off...
+        myNoTone(buzzer);//digitalWrite(buzzer, LOW);
     }
 
     //DOOR LOCKING
