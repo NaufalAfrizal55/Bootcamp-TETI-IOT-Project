@@ -72,6 +72,7 @@ void dht22(){
 
 /*---------DOOR LOCKING----------*/
 //DOOR LOCKING
+const int ledPinDoor = 19;
 bool doorLockingStatus = false;
 const int servoPin = 32;
 const int relay = 12;
@@ -79,8 +80,10 @@ Servo servo;
 void doorStatus(bool status) {
     String statusString;
     if (status) {
+        digitalWrite(ledPinDoor, HIGH);
         statusString = "LOCKED";
     } else {
+        digitalWrite(ledPinDoor, LOW);
         statusString = "UNLOCKED";
     }
     Serial.printf("Door Status: %s\r\n", statusString.c_str());
@@ -318,6 +321,7 @@ void setup() {
     dhtSensor.begin();
 
     //SETUP DOOR LOCKING
+    pinMode(ledPinDoor, OUTPUT);
     pinMode(relay, OUTPUT);
     servo.attach(servoPin);
 

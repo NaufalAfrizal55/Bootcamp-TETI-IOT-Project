@@ -17,7 +17,7 @@
       "id": "dht1",
       "top": -153.3,
       "left": 13.8,
-      "attrs": { "humidity": "36", "temperature": "47.7" }
+      "attrs": { "humidity": "36", "temperature": "-8.8" }
     },
     {
       "type": "wokwi-led",
@@ -32,14 +32,6 @@
       "top": -224.4,
       "left": 195.8,
       "attrs": { "color": "yellow", "flip": "" }
-    },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "btn1",
-      "top": 57,
-      "left": 223.8,
-      "rotate": 90,
-      "attrs": { "color": "grey" }
     },
     {
       "type": "wokwi-resistor",
@@ -58,19 +50,11 @@
       "attrs": {}
     },
     {
-      "type": "wokwi-resistor",
-      "id": "r2",
-      "top": 158.4,
-      "left": 220.25,
-      "rotate": 90,
-      "attrs": { "value": "1000" }
-    },
-    {
       "type": "wokwi-hc-sr04",
       "id": "ultrasonic1",
       "top": 260.7,
       "left": 91.9,
-      "attrs": { "distance": "40" }
+      "attrs": { "distance": "3" }
     },
     {
       "type": "wokwi-buzzer",
@@ -87,7 +71,14 @@
       "rotate": 270,
       "attrs": {}
     },
-    { "type": "wokwi-servo", "id": "servo1", "top": -213.2, "left": 355.2, "attrs": {} }
+    { "type": "wokwi-servo", "id": "servo1", "top": -213.2, "left": 355.2, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led3",
+      "top": -128.4,
+      "left": 426.2,
+      "attrs": { "color": "blue" }
+    }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
@@ -108,29 +99,23 @@
     [ "r1:2", "bb1:25t.b", "yellow", [ "h0" ] ],
     [ "esp:GND.1", "bb1:bn.1", "black", [ "v0" ] ],
     [ "esp:5V", "bb1:bp.1", "red", [ "v0" ] ],
-    [ "btn1:2.l", "esp:35", "gray", [ "v0", "h-441.8" ] ],
-    [ "btn1:2.r", "r2:1", "gray", [ "v0" ] ],
     [ "esp:4", "bb1:25t.d", "yellow", [ "v0" ] ],
-    [ "bb1:bp.23", "btn1:1.r", "green", [ "v0" ] ],
     [ "ultrasonic1:GND", "bb1:bn.16", "black", [ "v0" ] ],
     [ "ultrasonic1:VCC", "bb1:bp.14", "red", [ "v-134.4", "h9.6" ] ],
     [ "esp:14", "ultrasonic1:TRIG", "green", [ "v403.05", "h307.2" ] ],
     [ "ultrasonic1:ECHO", "esp:27", "green", [ "v38.4", "h-327.2" ] ],
     [ "bz1:2", "esp:26", "red", [ "v19.2", "h-154" ] ],
     [ "bz1:1", "bb1:bn.2", "black", [ "v9.6", "h48" ] ],
-    [ "btn1:1.l", "bb1:29t.a", "", [ "$bb" ] ],
-    [ "btn1:2.l", "bb1:27t.a", "", [ "$bb" ] ],
-    [ "btn1:1.r", "bb1:29b.f", "", [ "$bb" ] ],
-    [ "btn1:2.r", "bb1:27b.f", "", [ "$bb" ] ],
-    [ "r2:1", "bb1:27b.h", "", [ "$bb" ] ],
-    [ "r2:2", "bb1:bn.21", "", [ "$bb" ] ],
     [ "relay1:VCC", "bb1:tp.24", "red", [ "v0" ] ],
     [ "relay1:GND", "bb1:tn.25", "black", [ "v0" ] ],
     [ "relay1:IN", "esp:12", "orange", [ "v86.4", "h-0.2" ] ],
     [ "relay1:COM", "bb1:tp.28", "red", [ "v-30", "h-1.4" ] ],
     [ "servo1:V+", "relay1:NO", "red", [ "h-19.2", "v-28.7", "h-38.4" ] ],
     [ "servo1:GND", "bb1:tn.30", "black", [ "h0" ] ],
-    [ "servo1:PWM", "esp:32", "orange", [ "h-19.2", "v173", "h-518.4" ] ]
+    [ "servo1:PWM", "esp:32", "orange", [ "h-19.2", "v173", "h-518.4" ] ],
+    [ "led3:C", "bb1:tn.38", "black", [ "v0" ] ],
+    [ "led3:A", "bb1:48t.a", "blue", [ "v0" ] ],
+    [ "bb1:48t.b", "esp:19", "blue", [ "v-19.2", "h-662.4" ] ]
   ],
   "dependencies": {}
 }
